@@ -1,0 +1,27 @@
+# Python
+# add needed from https://github.com/github/gitignore/blob/main/Python.gitignore
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Local application data
+.seeklet/
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/
