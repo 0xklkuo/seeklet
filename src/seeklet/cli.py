@@ -13,6 +13,7 @@ from seeklet.config import (
     DEFAULT_MAX_PAGES,
     DEFAULT_TOP_K,
 )
+from seeklet.crawl import Crawler
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -115,9 +116,27 @@ def build_parser() -> argparse.ArgumentParser:
 
 def handle_crawl(args: argparse.Namespace) -> int:
     """Handle the crawl command."""
-    print("Crawl is not implemented yet.")
-    print(f"Seed URLs: {args.seed_urls}")
-    print(f"Database: {args.db}")
+    crawler = Crawler()
+
+    try:
+        pages = crawler.crawl(
+            args.seed_urls,
+            max_pages=args.max_pages,
+            max_depth=args.max_depth,
+            delay_seconds=args.delay_seconds,
+        )
+    except ValueError as error:
+        print(f"Error: {error}")
+        return 2
+    finally:
+        crawler.close()
+
+    print(f"Crawled {len(pages)} page(s).")
+    for page in pages:
+        title = page.title or "(untitled)"
+        print(f"[depth={page.depth}] {title}")
+        print(f"  {page.url}")
+
     return 0
 
 

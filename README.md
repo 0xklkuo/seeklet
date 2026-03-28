@@ -38,10 +38,17 @@ Seeklet will not initially include:
 
 ## Current Status
 
-This repository is currently at the project bootstrap stage.
+The crawler and HTML extraction are implemented.
 
-The CLI commands exist, but crawl and search behavior will be implemented in
-the next milestones.
+At this stage, Seeklet can:
+
+- crawl seed URLs
+- stay within the original host scope
+- respect `robots.txt`
+- extract titles, visible text, and links
+
+Persistence, indexing, and search ranking will be added in the next
+milestones.
 
 ## Quickstart
 
@@ -95,6 +102,10 @@ src/seeklet/
     __main__.py
     cli.py
     config.py
+    crawl.py
+    extract.py
+    models.py
+    normalize.py
 
 tests/
 docs/
