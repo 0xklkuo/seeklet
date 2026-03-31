@@ -9,7 +9,7 @@ description = "A minimal educational web search engine in Python."
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Your Name"},
+    {name = "KL KUO"},
 ]
 requires-python = ">=3.12"
 dependencies = [
