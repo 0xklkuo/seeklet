@@ -120,6 +120,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def handle_crawl(args: argparse.Namespace) -> int:
     """Handle the crawl command."""
+    error = _validate_crawl_args(args)
+    if error is not None:
+        print(f"Error: {error}")
+        return 2
+
     ensure_data_dir(args.db)
 
     crawler = Crawler()
@@ -152,6 +157,10 @@ def handle_crawl(args: argparse.Namespace) -> int:
 
 def handle_search(args: argparse.Namespace) -> int:
     """Handle the search command."""
+    if args.top_k < 1:
+        print("Error: --top-k must be at least 1.")
+        return 2
+
     results = search_index(
         args.db,
         args.query,
@@ -214,3 +223,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     return args.func(args)
+
+
+def _validate_crawl_args(args: argparse.Namespace) -> str | None:
+    """Validate crawl command arguments."""
+    if args.max_pages < 1:
+        return "--max-pages must be at least 1."
+
+    if args.max_depth < 0:
+        return "--max-depth must be at least 0."
+
+    if args.delay_seconds < 0:
+        return "--delay-seconds must be at least 0."
+
+    return None

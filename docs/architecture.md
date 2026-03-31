@@ -5,17 +5,17 @@
 Seeklet is a minimal educational search engine for learning the Python
 ecosystem and the fundamentals of modern search systems.
 
-## MVP Architecture
+## End-to-End Flow
 
 ```text
 seed URLs
-  -> crawler
-  -> HTML extraction
-  -> normalization/tokenization
-  -> SQLite storage
-  -> inverted index
-  -> BM25 ranking
-  -> CLI results
+  -> crawl allowed pages
+  -> fetch HTML
+  -> extract title, text, and links
+  -> normalize and tokenize text
+  -> rebuild SQLite index
+  -> execute ranked BM25 search
+  -> print CLI results
 ```
 
 ## Design Priorities
@@ -26,55 +26,132 @@ seed URLs
 4. Contributor friendliness
 5. Real-world enough to teach core ideas
 
-## Planned Modules
+## Current Modules
 
-- `cli.py`:
-  Parse commands and call application services.
+- `cli.py`
+  - parses commands
+  - validates inputs
+  - orchestrates crawl, search, stats, and reset
 
-- `config.py`:
-  Store default paths and runtime settings.
+- `crawl.py`
+  - performs synchronous seeded crawling
+  - enforces host scope
+  - respects `robots.txt`
 
-- `crawl.py`:
-  Crawl seed URLs within allowed scope.
+- `extract.py`
+  - parses HTML
+  - extracts title, visible text, and links
 
-- `extract.py`:
-  Extract title, visible text, and links from HTML.
+- `normalize.py`
+  - normalizes URLs
+  - normalizes whitespace
+  - tokenizes searchable text
 
-- `normalize.py`:
-  Normalize URLs and tokenize text.
+- `storage.py`
+  - creates the SQLite schema
+  - reads stats
+  - deletes local state
 
-- `storage.py`:
-  Manage SQLite persistence.
+- `index.py`
+  - rebuilds the local inverted index from crawled pages
 
-- `index.py`:
-  Build and update the inverted index.
+- `ranking.py`
+  - implements BM25 scoring helpers
 
-- `ranking.py`:
-  Compute BM25 scores.
+- `search.py`
+  - retrieves postings
+  - computes document scores
+  - returns ranked search results
 
-- `search.py`:
-  Execute queries and return ranked results.
+- `snippet.py`
+  - generates short text excerpts for results
 
-- `snippet.py`:
-  Produce short result snippets.
+- `models.py`
+  - defines small data objects shared between modules
 
-## Initial Technical Choices
+## SQLite Schema
 
-- Python 3.12
-- SQLite for persistence
-- `httpx` for HTTP fetching
-- `beautifulsoup4` for HTML parsing
-- `argparse` for CLI
-- `pytest` for tests
-- `ruff` for linting and formatting
+### `documents`
+Stores one row per crawled page.
+
+Fields:
+- `id`
+- `url`
+- `title`
+- `content`
+- `content_length`
+- `crawled_at`
+
+### `terms`
+Stores one row per normalized term.
+
+Fields:
+- `id`
+- `term`
+
+### `postings`
+Stores the inverted index.
+
+Fields:
+- `term_id`
+- `document_id`
+- `term_frequency`
+
+## Search Model
+
+Seeklet currently uses BM25.
+
+For each query:
+
+1. tokenize and normalize query text
+2. find indexed terms
+3. fetch matching postings
+4. compute BM25 contributions in Python
+5. sort by descending score
+6. return top-k results
+
+This keeps the ranking logic easy to inspect and learn from.
 
 ## Deliberate MVP Limits
 
-To keep the project educational and minimal, the MVP will not include:
+To keep the project educational and minimal, the MVP does not include:
 
 - JavaScript execution
 - asynchronous crawling
-- advanced ranking signals
-- vector databases
-- browser UI
-- distributed systems concerns
+- distributed indexing
+- PageRank
+- fuzzy matching
+- phrase or boolean search
+- vector search
+- a web API
+- a browser UI
+
+## Tradeoffs
+
+### Why SQLite?
+- built into Python
+- easy to inspect locally
+- enough for a small educational search engine
+- low setup cost for contributors
+
+### Why a Synchronous Crawler?
+- easier to understand
+- easier to test
+- enough for the current scale target
+
+### Why Rebuild the Index on Each Crawl?
+- simpler correctness model
+- easier for learners to follow
+- avoids premature complexity around partial updates
+
+## Future Extension Points
+
+Natural next improvements after the MVP:
+
+- incremental recrawling
+- better tokenization and language support
+- phrase and boolean queries
+- link-analysis signals
+- sitemap support
+- benchmark scripts
+- optional minimal web UI

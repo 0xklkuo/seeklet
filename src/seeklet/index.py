@@ -63,7 +63,7 @@ def _index_page(
         ),
     )
     if cursor.lastrowid is None:
-        return
+        raise RuntimeError("Failed to insert document row.")
 
     document_id = int(cursor.lastrowid)
 
@@ -86,7 +86,7 @@ def _get_or_create_term_id(
     connection: sqlite3.Connection,
     term: str,
     cache: dict[str, int],
-) -> int | None:
+) -> int:
     """Get or create the integer identifier for a term."""
     cached = cache.get(term)
     if cached is not None:
@@ -106,7 +106,7 @@ def _get_or_create_term_id(
         (term,),
     )
     if cursor.lastrowid is None:
-        return None
+        raise RuntimeError("Failed to insert term row.")
 
     term_id = int(cursor.lastrowid)
     cache[term] = term_id

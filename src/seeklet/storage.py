@@ -38,6 +38,8 @@ ON postings(document_id);
 
 def connect_database(db_path: Path) -> sqlite3.Connection:
     """Open a SQLite connection for the given database path."""
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")

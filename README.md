@@ -38,7 +38,7 @@ Seeklet will not initially include:
 
 ## Current Status
 
-The crawler, indexing, and search flow are implemented.
+The MVP is implemented.
 
 At this stage, Seeklet can:
 
@@ -86,12 +86,12 @@ ruff format --check .
 pytest
 ```
 
-## Planned CLI
+## Example Workflow
 
 ```bash
-seeklet crawl https://example.com --max-pages 200 --max-depth 2
-seeklet search "python packaging"
+seeklet crawl https://example.com --max-pages 20 --max-depth 1
 seeklet stats
+seeklet search "example domain"
 seeklet reset --yes
 ```
 
