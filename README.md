@@ -38,7 +38,7 @@ Seeklet will not initially include:
 
 ## Current Status
 
-The crawler and HTML extraction are implemented.
+The crawler, indexing, and search flow are implemented.
 
 At this stage, Seeklet can:
 
@@ -46,9 +46,10 @@ At this stage, Seeklet can:
 - stay within the original host scope
 - respect `robots.txt`
 - extract titles, visible text, and links
-
-Persistence, indexing, and search ranking will be added in the next
-milestones.
+- build a local SQLite index
+- search that index with BM25 ranking
+- show index statistics
+- reset local state
 
 ## Quickstart
 
@@ -104,8 +105,13 @@ src/seeklet/
     config.py
     crawl.py
     extract.py
+    index.py
     models.py
     normalize.py
+    ranking.py
+    search.py
+    snippet.py
+    storage.py
 
 tests/
 docs/

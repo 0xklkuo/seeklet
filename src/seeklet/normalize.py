@@ -8,6 +8,7 @@ from urllib.parse import SplitResult, urljoin, urlsplit, urlunsplit
 
 SUPPORTED_SCHEMES = {"http", "https"}
 
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
 _WHITESPACE_RE = re.compile(r"\s+")
 _MULTI_SLASH_RE = re.compile(r"/{2,}")
 
@@ -15,6 +16,12 @@ _MULTI_SLASH_RE = re.compile(r"/{2,}")
 def normalize_whitespace(text: str) -> str:
     """Collapse repeated whitespace into single spaces."""
     return _WHITESPACE_RE.sub(" ", text).strip()
+
+
+def tokenize_text(text: str) -> list[str]:
+    """Tokenize text into normalized search terms."""
+    normalized = normalize_whitespace(text).casefold()
+    return _TOKEN_RE.findall(normalized)
 
 
 def normalize_url(url: str, *, keep_query: bool = False) -> str | None:

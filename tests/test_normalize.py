@@ -1,6 +1,6 @@
 """Normalization tests."""
 
-from seeklet.normalize import normalize_url, resolve_url
+from seeklet.normalize import normalize_url, resolve_url, tokenize_text
 
 
 def test_normalize_url_removes_fragment_and_query_by_default() -> None:
@@ -36,3 +36,10 @@ def test_resolve_url_resolves_relative_links() -> None:
     assert resolve_url(base_url, href) == (
         "https://example.com/guide/getting-started.html"
     )
+
+
+def test_tokenize_text_normalizes_case_and_whitespace() -> None:
+    """Tokenization should return lowercase search terms."""
+    text = " Python,\nPACKAGING\t101! "
+
+    assert tokenize_text(text) == ["python", "packaging", "101"]

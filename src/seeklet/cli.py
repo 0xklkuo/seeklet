@@ -12,8 +12,12 @@ from seeklet.config import (
     DEFAULT_MAX_DEPTH,
     DEFAULT_MAX_PAGES,
     DEFAULT_TOP_K,
+    ensure_data_dir,
 )
 from seeklet.crawl import Crawler
+from seeklet.index import index_pages
+from seeklet.search import search_index
+from seeklet.storage import delete_database, read_index_stats
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -116,6 +120,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def handle_crawl(args: argparse.Namespace) -> int:
     """Handle the crawl command."""
+    ensure_data_dir(args.db)
+
     crawler = Crawler()
 
     try:
@@ -131,7 +137,11 @@ def handle_crawl(args: argparse.Namespace) -> int:
     finally:
         crawler.close()
 
-    print(f"Crawled {len(pages)} page(s).")
+    indexed_count = index_pages(args.db, pages)
+
+    print(f"Rebuilt index with {indexed_count} page(s).")
+    print(f"Database: {args.db}")
+
     for page in pages:
         title = page.title or "(untitled)"
         print(f"[depth={page.depth}] {title}")
@@ -142,24 +152,55 @@ def handle_crawl(args: argparse.Namespace) -> int:
 
 def handle_search(args: argparse.Namespace) -> int:
     """Handle the search command."""
-    print("Search is not implemented yet.")
-    print(f"Query: {args.query}")
-    print(f"Database: {args.db}")
+    results = search_index(
+        args.db,
+        args.query,
+        top_k=args.top_k,
+    )
+
+    if not results:
+        print("No results.")
+        return 0
+
+    for index, result in enumerate(results, start=1):
+        title = result.title or "(untitled)"
+        print(f"{index}. {title}")
+        print(f"   URL: {result.url}")
+        print(f"   Score: {result.score:.4f}")
+        if result.snippet:
+            print(f"   Snippet: {result.snippet}")
+        print()
+
     return 0
 
 
 def handle_stats(args: argparse.Namespace) -> int:
     """Handle the stats command."""
-    print("Stats is not implemented yet.")
+    stats = read_index_stats(args.db)
+
     print(f"Database: {args.db}")
+    print(f"Documents: {stats.document_count}")
+    print(f"Terms: {stats.term_count}")
+    print(f"Postings: {stats.posting_count}")
+    print(f"Average document length: {stats.average_document_length:.2f}")
+
     return 0
 
 
 def handle_reset(args: argparse.Namespace) -> int:
     """Handle the reset command."""
-    print("Reset is not implemented yet.")
-    print(f"Database: {args.db}")
-    print(f"Confirmed: {args.yes}")
+    if not args.yes:
+        response = input(f"Delete local index at {args.db}? [y/N]: ").strip()
+        if response.casefold() not in {"y", "yes"}:
+            print("Aborted.")
+            return 1
+
+    deleted = delete_database(args.db)
+    if deleted:
+        print(f"Deleted database: {args.db}")
+    else:
+        print(f"Nothing to delete: {args.db}")
+
     return 0
 
 
