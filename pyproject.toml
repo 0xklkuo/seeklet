@@ -30,7 +30,11 @@ seeklet = "seeklet.cli:main"
 packages = ["src/seeklet"]
 
 [tool.pytest.ini_options]
-addopts = "-ra"
+addopts = [
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+]
 testpaths = ["tests"]
 
 [tool.ruff]
